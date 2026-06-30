@@ -1,130 +1,112 @@
 #!/usr/bin/env python3
-"""Bank2Mp3 终端桥接 Server
-监听 localhost:8899，接收 APK 的命令请求并执行"""
-import json, subprocess, threading, os, sys
+"""Bank2Mp3 Bridge HTTP Server
+监听 localhost:8899，接收 APK 发来的解码请求
+"""
+import json
+import os
+import subprocess
+import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from pathlib import Path
 
-PORT = 8899
-SCRIPT_DIR = Path(__file__).parent
+SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPTS_DIR)
 
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        """健康检查 / 状态 / 文件列表"""
-        if self.path == '/health':
-            self._json({'status': 'ok', 'cwd': os.getcwd()})
-        elif self.path.startswith('/status'):
-            self._json({'status': 'running', 'port': PORT})
-        else:
-            self._json({'error': 'use POST'}, 404)
+from decode import convert_bank
 
-    def do_POST(self):
-        """执行命令或批量任务"""
-        try:
-            length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(length).decode('utf-8')
-            req = json.loads(body)
-            cmd_type = req.get('type', 'exec')
-
-            if cmd_type == 'exec':
-                # 单条命令
-                cmd = req['command']
-                timeout = req.get('timeout', 300)
-                self._exec_cmd(cmd, timeout)
-
-            elif cmd_type == 'batch':
-                # 批量 bank → WAV + MP3
-                bank_dir = req['bank_dir']
-                out_dir = req.get('output', '/storage/emulated/0/Download/Bank2Mp3_output')
-                to_mp3 = req.get('mp3', True)
-                classify = req.get('classify', False)
-                self._batch_convert(bank_dir, out_dir, to_mp3, classify)
-
-            elif cmd_type == 'wav2mp3':
-                # WAV → MP3
-                wav_dir = req.get('wav_dir', '/storage/emulated/0/Download/Bank2Mp3_output')
-                self._wav_to_mp3(wav_dir)
-
-            else:
-                self._json({'error': f'unknown type: {cmd_type}'}, 400)
-
-        except Exception as e:
-            self._json({'error': str(e)}, 500)
-
-    def _exec_cmd(self, cmd, timeout):
-        print(f'[exec] {cmd[:120]}')
-        try:
-            r = subprocess.run(cmd, shell=True, capture_output=True,
-                               text=True, timeout=timeout, cwd='/tmp')
-            self._json({
-                'ok': r.returncode == 0,
-                'code': r.returncode,
-                'stdout': r.stdout[-5000:],
-                'stderr': r.stderr[-2000:]
-            })
-        except subprocess.TimeoutExpired:
-            self._json({'ok': False, 'error': 'timeout'}, 408)
-
-    def _batch_convert(self, bank_dir, out_dir, to_mp3, classify):
-        batch_py = SCRIPT_DIR / 'batch_convert.py'
-        cmd = f'python3 {batch_py} "{bank_dir}" -o "{out_dir}"'
-        if to_mp3:
-            cmd += ' --mp3'
-        if classify:
-            cmd += ' --classify'
-        print(f'[batch] {bank_dir} classify={classify}')
-        try:
-            r = subprocess.run(cmd, shell=True, capture_output=True,
-                               text=True, timeout=600)
-            ok_count = r.stdout.count('✅')
-            if ok_count == 0:
-                ok_count = sum(1 for line in r.stdout.splitlines() if 'OK:' in line)
-
-            self._json({
-                'ok': r.returncode == 0,
-                'code': r.returncode,
-                'stdout': r.stdout[-8000:],
-                'stderr': r.stderr[-2000:],
-                'wav_count': ok_count,
-            })
-        except subprocess.TimeoutExpired:
-            self._json({'ok': False, 'error': 'batch timeout'}, 408)
-
-    def _wav_to_mp3(self, wav_dir):
-        print(f'[wav2mp3] {wav_dir}')
-        try:
-            # ffmpeg 批量
-            cmd = f'''cd "{wav_dir}" && for f in *.wav; do
-  ffmpeg -y -loglevel error -i "$f" -acodec mp3 -b:a 192k "${{f%.wav}}.mp3" 2>/dev/null && echo "OK:$f" || echo "FAIL:$f"
-done'''
-            r = subprocess.run(cmd, shell=True, capture_output=True,
-                               text=True, timeout=600)
-            ok = r.stdout.count('OK:')
-            fail = r.stdout.count('FAIL:')
-            self._json({
-                'ok': r.returncode == 0,
-                'stdout': r.stdout[-3000:],
-                'mp3_ok': ok, 'mp3_fail': fail
-            })
-        except subprocess.TimeoutExpired:
-            self._json({'ok': False, 'error': 'timeout'}, 408)
-
-    def _json(self, data, code=200):
-        self.send_response(code)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode())
-
+class BridgeHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
-        pass  # 静默
-
+        pass  # 静默日志
+    
+    def do_GET(self):
+        if self.path == '/health':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "cwd": os.getcwd()}).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length).decode('utf-8')
+        
+        try:
+            data = json.loads(body)
+            cmd_type = data.get('cmd_type', 'exec')
+            
+            if cmd_type == 'exec':
+                cmd = data['command']
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=120, cwd=SCRIPTS_DIR)
+                resp = {"ok": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
+            
+            elif cmd_type == 'batch':
+                bank_dir = data['bank_dir']
+                output_dir = data.get('output_dir', bank_dir)
+                fmt = data.get('format', 'wav')
+                mp3_bitrate = data.get('mp3_bitrate', '192k')
+                classify = data.get('classify', False)
+                
+                banks = [f for f in os.listdir(bank_dir) if f.endswith('.bank')]
+                results = {}
+                for bank in banks:
+                    bank_path = os.path.join(bank_dir, bank)
+                    bank_output = os.path.join(output_dir, os.path.splitext(bank)[0])
+                    os.makedirs(bank_output, exist_ok=True)
+                    files = convert_bank(bank_path, bank_output, fmt, mp3_bitrate)
+                    results[bank] = {"files": files, "count": len(files)}
+                
+                resp = {"ok": True, "results": results, "total_banks": len(banks)}
+                
+                if classify:
+                    from classify import classify_bank
+                    resp['classification'] = classify_bank(results)
+            
+            elif cmd_type == 'wav2mp3':
+                wav_dir = data['wav_dir']
+                output_dir = data.get('output_dir', wav_dir + '_mp3')
+                fmt = data.get('format', 'mp3')
+                bitrate = data.get('mp3_bitrate', '192k')
+                
+                wavs = [f for f in os.listdir(wav_dir) if f.lower().endswith('.wav')]
+                import shutil
+                ffmpeg = shutil.which('ffmpeg') or '/usr/bin/ffmpeg'
+                os.makedirs(output_dir, exist_ok=True)
+                converted = []
+                for wav in wavs:
+                    in_path = os.path.join(wav_dir, wav)
+                    base = os.path.splitext(wav)[0]
+                    ext = {'mp3': 'mp3', 'flac': 'flac', 'aac': 'm4a', 'ogg': 'ogg', 'opus': 'opus'}.get(fmt, 'mp3')
+                    out_path = os.path.join(output_dir, f"{base}.{ext}")
+                    subprocess.run([ffmpeg, '-y', '-i', in_path, '-codec:a', 
+                        'libmp3lame' if fmt == 'mp3' else fmt, '-b:a', bitrate, out_path],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    converted.append(out_path)
+                resp = {"ok": True, "converted": converted, "count": len(converted)}
+            
+            else:
+                resp = {"ok": False, "error": f"unknown cmd_type: {cmd_type}"}
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode())
+        
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": False, "error": str(e)}).encode())
 
 def main():
-    print(f'Bank2Mp3 Bridge → http://127.0.0.1:{PORT}')
-    print(f'端点: POST /exec | /batch | /wav2mp3   GET /health')
-    server = HTTPServer(('127.0.0.1', PORT), Handler)
-    server.serve_forever()
+    port = 8899
+    server = HTTPServer(('127.0.0.1', port), BridgeHandler)
+    print(f"Bridge Server: http://127.0.0.1:{port} (Ctrl+C to stop)")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        server.shutdown()
+        print("\nBridge stopped.")
 
 if __name__ == '__main__':
     main()
