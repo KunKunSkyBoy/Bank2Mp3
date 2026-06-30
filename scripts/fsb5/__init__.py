@@ -207,7 +207,6 @@ class FSB5:
 		if self.header.mode == SoundFormat.MPEG:
 			return sample.data
 		elif self.header.mode == SoundFormat.VORBIS:
-			# import here as vorbis.py requires native libraries
 			from . import vorbis
 			return vorbis.rebuild(sample)
 		elif self.header.mode.is_pcm:
