@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF8EC"
+    android:background="@color/dark_bg"
     android:fillViewport="true"
     android:padding="12dp">
 
@@ -12,20 +12,41 @@
         android:orientation="vertical">
 
         <!-- ═══════════ 标题 ═══════════ -->
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🎵 Bank → 多格式"
-            android:textSize="22sp"
-            android:textColor="#E8A449"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🎵 Bank → 多格式"
+                android:textSize="22sp"
+                android:textColor="@color/dark_gold"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnThemeToggle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="☀️"
+                android:textSize="18sp"
+                android:background="@color/dark_surface"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="FMOD .bank 音频提取 · 依赖 Operit 终端桥接"
             android:textSize="12sp"
-            android:textColor="#8B7355"
+            android:textColor="@color/dark_text2"
             android:layout_marginBottom="12dp" />
 
         <!-- ═══════════ 桥接状态栏 ═══════════ -->
@@ -34,7 +55,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="#1A000000"
+            android:background="@color/dark_surface"
             android:padding="10dp"
             android:layout_marginBottom="12dp">
 
@@ -54,7 +75,7 @@
                 android:text="🔄"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
-                android:background="#3498DB"
+                android:background="@color/dark_accent"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
@@ -68,8 +89,8 @@
                 android:layout_height="wrap_content"
                 android:text="🚀 启动"
                 android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:background="#E67E22"
+                android:textColor="#1A1A2E"
+                android:background="@color/dark_gold"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
@@ -85,7 +106,7 @@
             android:layout_height="wrap_content"
             android:text="📄 输入"
             android:textSize="13sp"
-            android:textColor="#1A2A40"
+            android:textColor="@color/dark_text"
             android:textStyle="bold"
             android:layout_marginBottom="6dp" />
 
@@ -105,7 +126,8 @@
                 android:minHeight="0dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:layout_marginEnd="6dp" />
+                android:layout_marginEnd="6dp"
+                android:backgroundTint="@color/dark_accent" />
 
             <Button
                 android:id="@+id/btnPickFolder"
@@ -116,7 +138,8 @@
                 android:textSize="14sp"
                 android:minHeight="0dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="10dp" />
+                android:paddingBottom="10dp"
+                android:backgroundTint="@color/dark_surface2" />
         </LinearLayout>
 
         <TextView
@@ -125,7 +148,7 @@
             android:layout_height="wrap_content"
             android:text="未选择文件"
             android:textSize="12sp"
-            android:textColor="#8B7355"
+            android:textColor="@color/dark_text2"
             android:ellipsize="middle"
             android:maxLines="2"
             android:layout_marginBottom="12dp" />
@@ -148,7 +171,8 @@
                 android:paddingBottom="6dp"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:layout_marginEnd="6dp" />
+                android:layout_marginEnd="6dp"
+                android:backgroundTint="@color/dark_surface2" />
 
             <Button
                 android:id="@+id/btnResetOutput"
@@ -160,7 +184,8 @@
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp"
                 android:paddingStart="8dp"
-                android:paddingEnd="8dp" />
+                android:paddingEnd="8dp"
+                android:backgroundTint="@color/dark_surface2" />
         </LinearLayout>
 
         <TextView
@@ -169,7 +194,7 @@
             android:layout_height="wrap_content"
             android:text="Download/Bank2Mp3_output"
             android:textSize="11sp"
-            android:textColor="#8B7355"
+            android:textColor="@color/dark_text2"
             android:ellipsize="middle"
             android:maxLines="2"
             android:layout_marginBottom="14dp" />
@@ -180,7 +205,7 @@
             android:layout_height="wrap_content"
             android:text="▶ 终端桥接"
             android:textSize="13sp"
-            android:textColor="#1A2A40"
+            android:textColor="@color/dark_text"
             android:textStyle="bold"
             android:layout_marginBottom="6dp" />
 
@@ -191,7 +216,7 @@
             android:text="▶ 单文件 → WAV"
             android:textSize="15sp"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#27AE60"
+            android:backgroundTint="@color/dark_green"
             android:enabled="false"
             android:minHeight="0dp"
             android:paddingTop="12dp"
@@ -227,7 +252,7 @@
                 android:text="批量 → MP3"
                 android:textSize="13sp"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#27AE60"
+                android:backgroundTint="@color/dark_green"
                 android:enabled="false"
                 android:minHeight="0dp"
                 android:paddingTop="10dp"
@@ -241,7 +266,7 @@
             android:text="📂 批量分类 → 中文目录"
             android:textSize="13sp"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#E67E22"
+            android:backgroundTint="@color/dark_gold"
             android:enabled="false"
             android:minHeight="0dp"
             android:paddingTop="10dp"
@@ -254,7 +279,7 @@
             android:layout_height="wrap_content"
             android:text="⬆ WAV 转格式"
             android:textSize="13sp"
-            android:textColor="#1A2A40"
+            android:textColor="@color/dark_text"
             android:textStyle="bold"
             android:layout_marginBottom="6dp" />
 
@@ -272,7 +297,7 @@
                 android:text="MP3\n192k"
                 android:textSize="12sp"
                 android:textColor="#FFFFFF"
-                android:background="#8E44AD"
+                android:background="@color/dark_accent"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
@@ -288,7 +313,7 @@
                 android:text="MP3\n320k"
                 android:textSize="12sp"
                 android:textColor="#FFFFFF"
-                android:background="#9B59B6"
+                android:background="@color/dark_accent2"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
@@ -304,7 +329,7 @@
                 android:text="AAC\nM4A"
                 android:textSize="12sp"
                 android:textColor="#FFFFFF"
-                android:background="#E74C3C"
+                android:background="@color/dark_red"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
@@ -390,7 +415,7 @@
                 android:layout_height="wrap_content"
                 android:text="0%"
                 android:textSize="13sp"
-                android:textColor="#E8A449"
+                android:textColor="@color/dark_gold"
                 android:minWidth="40dp"
                 android:gravity="end"
                 android:layout_marginStart="8dp" />
@@ -410,20 +435,35 @@
                 android:layout_weight="1"
                 android:text="📋 日志"
                 android:textSize="13sp"
-                android:textColor="#1A2A40"
+                android:textColor="@color/dark_text2"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnCopyLog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="复制日志"
+                android:text="复制"
                 android:textSize="11sp"
                 android:minHeight="0dp"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp" />
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="@color/dark_accent" />
+
+            <Button
+                android:id="@+id/btnClearLog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清空"
+                android:textSize="11sp"
+                android:minHeight="0dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:backgroundTint="@color/dark_surface2" />
         </LinearLayout>
 
         <TextView
@@ -432,9 +472,9 @@
             android:layout_height="wrap_content"
             android:text="等待操作..."
             android:textSize="11sp"
-            android:textColor="#5C5C5C"
+            android:textColor="@color/dark_text2"
             android:fontFamily="monospace"
-            android:background="#1A000000"
+            android:background="@color/dark_surface"
             android:padding="10dp"
             android:minHeight="200dp"
             android:gravity="top|start" />
