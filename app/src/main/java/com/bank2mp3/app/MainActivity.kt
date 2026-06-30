@@ -1,5 +1,10 @@
 package com.bank2mp3.app
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -17,6 +22,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var b: ActivityMainBinding
     private var job: Job? = null
     private var bridgeAlive = false
+    private var isDarkTheme = true
+
+    companion object {
+        private const val PREFS = "bank2mp3_prefs"
+        private const val KEY_DARK_THEME = "dark_theme"
+    }
 
     private val outputDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Bank2Mp3_output")
     private val inputDir  = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Bank2Mp3_input")
@@ -30,6 +41,9 @@ class MainActivity : AppCompatActivity() {
     private val outputPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let { onOutputPicked(it) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 读取主题偏好
+        isDarkTheme = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_DARK_THEME, true)
+        setTheme(if (isDarkTheme) R.style.Theme_Bank2Mp3 else R.style.Theme_Bank2Mp3_Light)
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -37,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         log("✅ 就绪 | 输出: ${outputDir.absolutePath}")
         bindUI()
         applyButtonAnimations()
+        startTitleBreathing()
         // 后台解压 rootfs + 检测桥接
         CoroutineScope(Dispatchers.IO).launch {
             try { PythonRuntime.init(this@MainActivity) } catch (e: Exception) { ui { log("rootfs: ${e.message}") } }
@@ -48,44 +63,100 @@ class MainActivity : AppCompatActivity() {
     private fun applyButtonAnimations() {
         val btns = listOf(
             b.btnPickFile, b.btnPickFolder, b.btnPickOutput, b.btnResetOutput,
-            b.btnBridgeStart, b.btnBridgeRefresh,
+            b.btnBridgeStart, b.btnBridgeRefresh, b.btnThemeToggle,
             b.btnTerminalConvert, b.btnTerminalBatch, b.btnTerminalBatchMp3, b.btnTerminalClassify,
             b.btnWavToMp3, b.btnWavToMp3HQ, b.btnWavToAac, b.btnWavToFlac, b.btnWavToOgg, b.btnWavToOpus,
             b.btnCopyLog, b.btnClearLog
         )
-        // ── 入场 stagger：从下方弹入 ──
+        // ── 入场 stagger：从下方弹入 + 链式衰减震荡 ──
         btns.forEachIndexed { i, view ->
             view.translationY = 60f
             view.alpha = 0f
             view.animate()
                 .translationY(0f).alpha(1f)
-                .setDuration(500)
-                .setStartDelay(i * 30L)
-                .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                .setDuration(450)
+                .setStartDelay(i * 28L)
+                .setInterpolator(android.view.animation.OvershootInterpolator(2.5f))
                 .start()
         }
-        // ── 按压弹簧 ──
+        // ── 按压：链式衰减震荡 (模拟 GSAP elastic.out) ──
         btns.forEach { view ->
             view.setOnTouchListener { v, event ->
                 when (event.action) {
                     android.view.MotionEvent.ACTION_DOWN -> {
                         v.animate().cancel()
-                        v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(60).start()
+                        v.animate().scaleX(0.86f).scaleY(0.86f).setDuration(50).start()
+                        v.animate().translationZ(-4f).setDuration(50).start()
                     }
                     android.view.MotionEvent.ACTION_UP -> {
                         v.animate().cancel()
-                        v.animate().scaleX(1f).scaleY(1f)
-                            .setDuration(350)
-                            .setInterpolator(android.view.animation.OvershootInterpolator(3f))
-                            .start()
+                        chainSpring(v)
                     }
                     android.view.MotionEvent.ACTION_CANCEL -> {
                         v.animate().cancel()
-                        v.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+                        v.animate().scaleX(1f).scaleY(1f).translationZ(0f).setDuration(120).start()
                     }
                 }
                 false
             }
+        }
+    }
+
+    /** 链式衰减震荡：1.07→0.95→1.025→1.0，模拟 elastic.out 多段弹跳 */
+    private fun chainSpring(view: View) {
+        view.animate().cancel()
+        view.animate()
+            .scaleX(1.07f).scaleY(1.07f).translationZ(6f)
+            .setDuration(180)
+            .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+            .withEndAction {
+                view.animate()
+                    .scaleX(0.95f).scaleY(0.95f).translationZ(2f)
+                    .setDuration(140)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator(2f))
+                    .withEndAction {
+                        view.animate()
+                            .scaleX(1.025f).scaleY(1.025f).translationZ(3f)
+                            .setDuration(100)
+                            .setInterpolator(android.view.animation.DecelerateInterpolator(2f))
+                            .withEndAction {
+                                view.animate()
+                                    .scaleX(1f).scaleY(1f).translationZ(0f)
+                                    .setDuration(70)
+                                    .setInterpolator(android.view.animation.DecelerateInterpolator(3f))
+                            }
+                    }
+            }
+    }
+
+    private fun startTitleBreathing() {
+        val title = b.tvTitle
+        // 烛光呼吸：scale 1.0 ↔ 1.04，暖金光晕闪烁
+        ObjectAnimator.ofFloat(title, "scaleX", 1f, 1.04f, 1f).apply {
+            duration = 2500
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            start()
+        }
+        ObjectAnimator.ofFloat(title, "scaleY", 1f, 1.04f, 1f).apply {
+            duration = 2800
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            start()
+        }
+        // 光晕渐变：从暗金到亮金再回暗金
+        ValueAnimator.ofFloat(0f, 1f, 0f).apply {
+            duration = 3000
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+            addUpdateListener {
+                val t = animatedValue as Float
+                val r = (0xD4 + (0xFF - 0xD4) * t).toInt()
+                val g = (0x94 + (0xD6 - 0x94) * t).toInt()
+                val bb = (0x3A + (0x99 - 0x3A) * t).toInt()
+                title.setTextColor(Color.rgb(r, g, bb))
+            }
+            start()
         }
     }
 
@@ -129,6 +200,13 @@ class MainActivity : AppCompatActivity() {
         b.btnClearLog.setOnClickListener {
             b.tvLog.text = "等待操作..."
         }
+        // ── 主题切换 ──
+        b.btnThemeToggle.text = if (isDarkTheme) "🌙" else "☀️"
+        b.btnThemeToggle.setOnClickListener {
+            val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            prefs.edit().putBoolean(KEY_DARK_THEME, !isDarkTheme).apply()
+            recreate()
+        }
     }
 
     private fun setBtns(on: Boolean) {
@@ -153,7 +231,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ═══ 文件选择 ═══
     private fun onBankPicked(uri: Uri) {
         resolveFilePath(uri)?.let {
             bankPath = it; b.tvFile.text = File(it).name
@@ -177,7 +254,6 @@ class MainActivity : AppCompatActivity() {
         resolveTreePath(uri)?.let { outputPath = it; b.tvOutputDir.text = it; File(it).mkdirs(); log("输出: $it") }
     }
 
-    // ═══ 桥接 ═══
     private fun terminalConvertSingle(path: String) {
         if (!bridgeAlive) { toast("桥接未连接"); return }
         job?.cancel(); job = CoroutineScope(Dispatchers.IO).launch {
@@ -207,7 +283,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ═══ Path ═══
     private fun resolveFilePath(uri: Uri): String? {
         try {
             contentResolver.query(uri, arrayOf(android.provider.MediaStore.MediaColumns.DATA), null, null, null)?.use { c ->
@@ -230,7 +305,6 @@ class MainActivity : AppCompatActivity() {
         }
     } catch (_: Exception) { null }
 
-    // ═══ UI ═══
     private fun showProgress(on: Boolean) { b.progressContainer.visibility = if (on) View.VISIBLE else View.GONE; if (on) { b.progress.progress = 0; b.tvProgress.text = "0%" } }
     private fun log(msg: String) { runOnUiThread { b.tvLog.text = ((b.tvLog.text?.toString() ?: "") + "\n" + msg).lines().takeLast(150).joinToString("\n") } }
     private suspend fun ui(block: () -> Unit) = withContext(Dispatchers.Main) { block() }
