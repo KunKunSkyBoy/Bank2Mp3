@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/apk/res/android">
+    <!-- ═══ 暗色主题 ═══ -->
+    <style name="Base.Theme.Bank2Mp3" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dark_accent</item>
+        <item name="colorPrimaryDark">@color/dark_bg</item>
+        <item name="colorAccent">@color/dark_accent2</item>
+        <item name="android:colorBackground">@color/dark_bg</item>
+        <item name="android:statusBarColor">@color/dark_bg</item>
+        <item name="android:navigationBarColor">@color/dark_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/dark_bg</item>
+        <item name="android:scrollbarThumbVertical">@color/dark_surface2</item>
+        <item name="android:buttonStyle">@style/AppButton</item>
+    </style>
+
+    <!-- 现代圆角按钮 -->
+    <style name="AppButton" parent="Widget.Material3.Button">
+        <item name="cornerRadius">12dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <!-- 光遇暖色主题 (亮色模式) -->
+    <style name="Base.Theme.Bank2Mp3.Light" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dark_accent</item>
+        <item name="colorPrimaryDark">@color/sky_navy</item>
+        <item name="colorAccent">@color/sky_amber</item>
+        <item name="android:colorBackground">@color/sky_cream</item>
+        <item name="android:statusBarColor">@color/sky_navy</item>
+        <item name="android:navigationBarColor">@color/sky_cream</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/sky_cream</item>
+        <item name="android:scrollbarThumbVertical">@color/sky_cream_dark</item>
+        <item name="android:buttonStyle">@style/AppButton</item>
+    </style>
+
+    <style name="Theme.Bank2Mp3.Light" parent="Base.Theme.Bank2Mp3.Light" />
+
+    <style name="Theme.Bank2Mp3" parent="Base.Theme.Bank2Mp3" />
+</resources>
