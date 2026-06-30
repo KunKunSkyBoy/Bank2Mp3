@@ -12,7 +12,7 @@ object PythonRuntime {
     private lateinit var libPath: String
     private lateinit var scriptsDir: File
 
-    private const val VERSION = 10
+    private const val VERSION = 11
 
     fun init(context: Context): Boolean {
         if (ready) return true
@@ -27,6 +27,10 @@ object PythonRuntime {
             try {
                 extractRootfs(context)
                 copyScripts(context)
+                // 创建 python3 → python3.12 软链接 (subprocess 需要)
+                val binDir = File(rootfsDir, "bin")
+                ProcessBuilder("sh", "-c", "cd \"${binDir.absolutePath}\" && ln -sf python3.12 python3")
+                    .start().waitFor()
                 versionFile.writeText(VERSION.toString())
             } catch (e: Exception) {
                 rootfsDir.deleteRecursively()
