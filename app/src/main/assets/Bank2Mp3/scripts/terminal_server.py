@@ -8,6 +8,12 @@ from pathlib import Path
 PORT = 8899
 SCRIPT_DIR = Path(__file__).parent
 
+# ── 嵌入模式检测 ──
+_BIN_DIR = os.path.dirname(sys.executable)  # rootfs/bin/
+_EMBEDDED = 'rootfs' in _BIN_DIR
+if _EMBEDDED:
+    os.environ['PATH'] = _BIN_DIR + ':' + os.environ.get('PATH', '/usr/bin:/bin')
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         """健康检查 / 状态 / 文件列表"""
@@ -52,6 +58,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json({'error': str(e)}, 500)
 
     def _exec_cmd(self, cmd, timeout):
+        if _EMBEDDED:
+            cmd = cmd.replace('python3', sys.executable)
         print(f'[exec] {cmd[:120]}')
         try:
             r = subprocess.run(cmd, shell=True, capture_output=True,
