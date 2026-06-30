@@ -143,8 +143,6 @@ def errcheck(result, func, arguments):
 		raise OSError('Call to %s(%s) returned %d (error)' % (func.__name__, ', '.join(str(x) for x in arguments), result))
 	return result == 0
 
-######## libvorbis functions ########
-
 vorbis.vorbis_info_init.argtypes = [ctypes.POINTER(VorbisInfo)]
 vorbis.vorbis_info_init.restype = None
 
@@ -191,8 +189,6 @@ def vorbis_packet_blocksize_errcheck(result, func, arguments):
 vorbis.vorbis_packet_blocksize.argtypes = [ctypes.POINTER(VorbisInfo), ctypes.POINTER(OggPacket)]
 vorbis.vorbis_packet_blocksize.errcheck = vorbis_packet_blocksize_errcheck
 
-
-######## libogg functions ########
 
 ogg.ogg_stream_init.argtypes = [ctypes.POINTER(OggStreamState), ctypes.c_int]
 ogg.ogg_stream_init.errcheck = errcheck
