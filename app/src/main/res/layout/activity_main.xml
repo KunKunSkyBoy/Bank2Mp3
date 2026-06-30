@@ -3,39 +3,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFF8EC"
-    android:padding="14dp">
+    android:fillViewport="true"
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- ═══════════ 标题 ═══════════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🎵 Bank → 多格式"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textColor="#E8A449"
-            android:textStyle="bold"
-            android:layout_marginBottom="2dp" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FMOD .bank 音频提取 · HTTP桥接"
-            android:textSize="11sp"
+            android:text="FMOD .bank 音频提取 · 依赖 Operit 终端桥接"
+            android:textSize="12sp"
             android:textColor="#8B7355"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="12dp" />
 
+        <!-- ═══════════ 桥接状态栏 ═══════════ -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="36dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="#1A000000"
-            android:paddingStart="8dp"
-            android:paddingEnd="4dp"
-            android:layout_marginBottom="10dp">
+            android:padding="10dp"
+            android:layout_marginBottom="12dp">
 
             <TextView
                 android:id="@+id/bridgeStatus"
@@ -43,82 +44,93 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="🔴 未连接"
-                android:textSize="12sp"
-                android:textColor="#E74C3C"
-                android:maxLines="1" />
+                android:textSize="13sp"
+                android:textColor="#E74C3C" />
 
             <TextView
                 android:id="@+id/btnBridgeRefresh"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="🔄"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textColor="#FFFFFF"
                 android:background="#3498DB"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
-                android:layout_marginEnd="6dp" />
+                android:padding="6dp"
+                android:minWidth="36dp"
+                android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/btnBridgeStart"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:text="🚀 启动"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textColor="#FFFFFF"
                 android:background="#E67E22"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
         </LinearLayout>
 
+        <!-- ═══════════ 文件选择 ═══════════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="📄 输入"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textColor="#1A2A40"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="6dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="6dp">
 
             <Button
                 android:id="@+id/btnPickFile"
                 android:layout_width="0dp"
-                android:layout_height="38dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="选 .bank"
-                android:textSize="13sp"
+                android:text="选择 .bank"
+                android:textSize="14sp"
+                android:minHeight="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:layout_marginEnd="6dp" />
 
             <Button
                 android:id="@+id/btnPickFolder"
                 android:layout_width="0dp"
-                android:layout_height="38dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="选目录"
-                android:textSize="13sp" />
+                android:text="选择目录"
+                android:textSize="14sp"
+                android:minHeight="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/tvFile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="未选择"
-            android:textSize="10sp"
-            android:textColor="#B8A088"
-            android:layout_marginBottom="6dp" />
+            android:text="未选择文件"
+            android:textSize="12sp"
+            android:textColor="#8B7355"
+            android:ellipsize="middle"
+            android:maxLines="2"
+            android:layout_marginBottom="12dp" />
 
+        <!-- ═══════════ 输出目录 ═══════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -128,10 +140,12 @@
             <Button
                 android:id="@+id/btnPickOutput"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:text="📂 输出"
-                android:textSize="11sp"
-                android:minWidth="0dp"
+                android:layout_height="wrap_content"
+                android:text="📂 输出目录"
+                android:textSize="12sp"
+                android:minHeight="0dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:layout_marginEnd="6dp" />
@@ -139,10 +153,12 @@
             <Button
                 android:id="@+id/btnResetOutput"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:text="默认"
-                android:textSize="10sp"
-                android:minWidth="0dp"
+                android:layout_height="wrap_content"
+                android:text="恢复默认"
+                android:textSize="12sp"
+                android:minHeight="0dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp" />
         </LinearLayout>
@@ -152,168 +168,205 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Download/Bank2Mp3_output"
-            android:textSize="9sp"
-            android:textColor="#B8A088"
-            android:layout_marginBottom="10dp" />
+            android:textSize="11sp"
+            android:textColor="#8B7355"
+            android:ellipsize="middle"
+            android:maxLines="2"
+            android:layout_marginBottom="14dp" />
 
+        <!-- ═══════════ 终端转换 ═══════════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="▶ 终端桥接"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textColor="#1A2A40"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="6dp" />
 
         <Button
             android:id="@+id/btnTerminalConvert"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
+            android:layout_height="wrap_content"
             android:text="▶ 单文件 → WAV"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#27AE60"
             android:enabled="false"
-            android:layout_marginBottom="4dp" />
+            android:minHeight="0dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_marginBottom="6dp" />
 
-        <Button
-            android:id="@+id/btnTerminalBatch"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="📁 批量目录 → WAV"
-            android:textSize="13sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2980B9"
-            android:enabled="false"
-            android:layout_marginBottom="4dp" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
 
-        <Button
-            android:id="@+id/btnTerminalBatchMp3"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="📁 批量目录 → MP3"
-            android:textSize="13sp"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#27AE60"
-            android:enabled="false"
-            android:layout_marginBottom="4dp" />
+            <Button
+                android:id="@+id/btnTerminalBatch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="批量 → WAV"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2980B9"
+                android:enabled="false"
+                android:minHeight="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btnTerminalBatchMp3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="批量 → MP3"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#27AE60"
+                android:enabled="false"
+                android:minHeight="0dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnTerminalClassify"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:text="📂 批量分类 → 中文目录"
             android:textSize="13sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#E67E22"
             android:enabled="false"
-            android:layout_marginBottom="12dp" />
+            android:minHeight="0dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_marginBottom="14dp" />
 
+        <!-- ═══════════ WAV 格式转换 ═══════════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="⬆ WAV 转格式"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textColor="#1A2A40"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="6dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="6dp">
 
             <TextView
                 android:id="@+id/btnWavToMp3"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="MP3 192k"
-                android:textSize="11sp"
+                android:text="MP3\n192k"
+                android:textSize="12sp"
                 android:textColor="#FFFFFF"
                 android:background="#8E44AD"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:layout_marginEnd="4dp" />
 
             <TextView
                 android:id="@+id/btnWavToMp3HQ"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="MP3 320k"
-                android:textSize="11sp"
+                android:text="MP3\n320k"
+                android:textSize="12sp"
                 android:textColor="#FFFFFF"
                 android:background="#9B59B6"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:layout_marginEnd="4dp" />
 
             <TextView
                 android:id="@+id/btnWavToAac"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="AAC M4A"
-                android:textSize="11sp"
+                android:text="AAC\nM4A"
+                android:textSize="12sp"
                 android:textColor="#FFFFFF"
                 android:background="#E74C3C"
                 android:gravity="center"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="6dp">
 
             <TextView
                 android:id="@+id/btnWavToFlac"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="FLAC"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:textColor="#FFFFFF"
                 android:background="#1ABC9C"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:layout_marginEnd="4dp" />
 
             <TextView
                 android:id="@+id/btnWavToOgg"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="OGG"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:textColor="#FFFFFF"
                 android:background="#F39C12"
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:layout_marginEnd="4dp" />
 
             <TextView
                 android:id="@+id/btnWavToOpus"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="OPUS"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:textColor="#FFFFFF"
                 android:background="#D35400"
                 android:gravity="center"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp" />
         </LinearLayout>
 
+        <!-- ═══════════ 进度条 ═══════════ -->
         <LinearLayout
             android:id="@+id/progressContainer"
             android:layout_width="match_parent"
@@ -321,13 +374,13 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:visibility="gone"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="10dp">
 
             <ProgressBar
                 android:id="@+id/progress"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="0dp"
-                android:layout_height="6dp"
+                android:layout_height="8dp"
                 android:layout_weight="1"
                 android:max="100" />
 
@@ -336,13 +389,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0%"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 android:textColor="#E8A449"
-                android:minWidth="36dp"
+                android:minWidth="40dp"
                 android:gravity="end"
-                android:layout_marginStart="6dp" />
+                android:layout_marginStart="8dp" />
         </LinearLayout>
 
+        <!-- ═══════════ 日志 ═══════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -355,19 +409,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="📋 日志"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textColor="#1A2A40"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnCopyLog"
                 android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:text="📋 复制"
-                android:textSize="10sp"
-                android:minWidth="0dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp" />
+                android:layout_height="wrap_content"
+                android:text="复制日志"
+                android:textSize="11sp"
+                android:minHeight="0dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp" />
         </LinearLayout>
 
         <TextView
@@ -375,13 +431,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="等待操作..."
-            android:textSize="10sp"
-            android:textColor="#8B7355"
+            android:textSize="11sp"
+            android:textColor="#5C5C5C"
             android:fontFamily="monospace"
             android:background="#1A000000"
             android:padding="10dp"
-            android:minHeight="180dp"
-            android:gravity="top" />
+            android:minHeight="200dp"
+            android:gravity="top|start" />
 
     </LinearLayout>
 </ScrollView>
