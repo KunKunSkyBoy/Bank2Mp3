@@ -1,63 +1,28 @@
 package com.bank2mp3.app
-
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import org.json.JSONObject
 
 object TerminalBridge {
     private const val BASE = "http://127.0.0.1:8899"
-    
-    suspend fun checkHealth(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val conn = URL("$BASE/health").openConnection() as HttpURLConnection
-            conn.connectTimeout = 3000
-            conn.readTimeout = 3000
-            conn.connect()
-            conn.responseCode == 200
-        } catch (e: Exception) { false }
+    data class Response(val ok: Boolean, val code: Int=0, val stdout: String="", val stderr: String="", val error: String="", val wavCount: Int=0)
+    fun checkHealth() = try { (URL("$BASE/health").openConnection() as HttpURLConnection).apply { connectTimeout=2000; readTimeout=2000; requestMethod="GET" }.responseCode == 200 } catch (_: Exception) { false }
+    suspend fun convertSingle(bankPath: String, outputDir: String): Response = withContext(Dispatchers.IO) {
+        post(JSONObject().apply { put("command", "python3 /storage/emulated/0/Download/Bank2Mp3/scripts/decode.py \"$bankPath\" \"$outputDir\""); put("timeout", 300) })
     }
-    
-    suspend fun exec(command: String): String = withContext(Dispatchers.IO) {
-        post("exec", JSONObject().apply { put("command", command) })
+    suspend fun batchConvert(bankDir: String, outputDir: String, toMp3: Boolean, classify: Boolean=false): Response = withContext(Dispatchers.IO) {
+        post(JSONObject().apply { put("type","batch"); put("bank_dir",bankDir); put("output",outputDir); put("mp3",toMp3); put("classify",classify) }, 600)
     }
-    
-    suspend fun batchConvert(bankDir: String, outputDir: String, format: String = "wav", mp3Bitrate: String = "192k", classify: Boolean = false): String = withContext(Dispatchers.IO) {
-        post("batch", JSONObject().apply {
-            put("bank_dir", bankDir)
-            put("output_dir", outputDir)
-            put("format", format)
-            put("mp3_bitrate", mp3Bitrate)
-            put("classify", classify)
-        })
+    suspend fun wavConvert(wavDir: String, format: String, bitrate: String): Response = withContext(Dispatchers.IO) {
+        val ext = if (format=="aac") "m4a" else format
+        val codec = when(format) { "mp3"->"-codec:a libmp3lame -b:a $bitrate"; "aac"->"-codec:a aac -b:a $bitrate"; "flac"->"-codec:a flac"; "ogg"->"-codec:a libvorbis -q:a $bitrate"; "opus"->"-codec:a libopus -b:a $bitrate"; else->"-codec:a libmp3lame -b:a 192k" }
+        post(JSONObject().apply { put("command", "cd \"$wavDir\" && for f in *.wav; do ffmpeg -y -loglevel error -i \"\$f\" $codec \"\${f%.wav}.$ext\" 2>&1; done"); put("timeout", 600) })
     }
-    
-    suspend fun wav2Format(wavDir: String, outputDir: String, format: String = "mp3", bitrate: String = "192k"): String = withContext(Dispatchers.IO) {
-        post("wav2mp3", JSONObject().apply {
-            put("wav_dir", wavDir)
-            put("output_dir", outputDir)
-            put("format", format)
-            put("mp3_bitrate", bitrate)
-        })
-    }
-    
-    private fun post(endpoint: String, json: JSONObject): String {
-        val url = URL("$BASE/$endpoint")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "POST"
-        conn.doOutput = true
-        conn.connectTimeout = 300000
-        conn.readTimeout = 300000
-        conn.setRequestProperty("Content-Type", "application/json")
-        conn.outputStream.write(json.toString().toByteArray())
-        conn.outputStream.flush()
-        
-        return if (conn.responseCode == 200) {
-            BufferedReader(InputStreamReader(conn.inputStream)).readText()
-        } else {
-            "{\"ok\":false,\"error\":\"HTTP ${conn.responseCode}\"}"
-        }
-    }
+    private fun post(body: JSONObject, timeout: Int=300): Response = try {
+        val conn = (URL("$BASE/exec").openConnection() as HttpURLConnection).apply { connectTimeout=2000; readTimeout=timeout*1000; requestMethod="POST"; setRequestProperty("Content-Type","application/json"); doOutput=true }
+        conn.outputStream.write(body.toString().toByteArray())
+        val json = JSONObject(conn.inputStream.bufferedReader().readText())
+        Response(json.optBoolean("ok"), json.optInt("code"), json.optString("stdout",""), json.optString("stderr",""), json.optString("error",""), json.optInt("wav_count"))
+    } catch (e: Exception) { Response(false, error=e.message?:"unknown") }
 }
