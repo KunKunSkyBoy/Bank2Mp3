@@ -36,14 +36,61 @@ class MainActivity : AppCompatActivity() {
         outputDir.mkdirs(); inputDir.mkdirs()
         log("✅ 就绪 | 输出: ${outputDir.absolutePath}")
         bindUI()
+        applyButtonAnimations()
+        // 后台解压 rootfs + 检测桥接
         CoroutineScope(Dispatchers.IO).launch {
             try { PythonRuntime.init(this@MainActivity) } catch (e: Exception) { ui { log("rootfs: ${e.message}") } }
             checkBridge()
         }
     }
 
+    /** 给所有按钮叠加 GSAP 级按压 + 入场 stagger 动效 */
+    private fun applyButtonAnimations() {
+        val btns = listOf(
+            b.btnPickFile, b.btnPickFolder, b.btnPickOutput, b.btnResetOutput,
+            b.btnBridgeStart, b.btnBridgeRefresh,
+            b.btnTerminalConvert, b.btnTerminalBatch, b.btnTerminalBatchMp3, b.btnTerminalClassify,
+            b.btnWavToMp3, b.btnWavToMp3HQ, b.btnWavToAac, b.btnWavToFlac, b.btnWavToOgg, b.btnWavToOpus,
+            b.btnCopyLog, b.btnClearLog
+        )
+        // ── 入场 stagger：从下方弹入 ──
+        btns.forEachIndexed { i, view ->
+            view.translationY = 60f
+            view.alpha = 0f
+            view.animate()
+                .translationY(0f).alpha(1f)
+                .setDuration(500)
+                .setStartDelay(i * 30L)
+                .setInterpolator(android.view.animation.OvershootInterpolator(2f))
+                .start()
+        }
+        // ── 按压弹簧 ──
+        btns.forEach { view ->
+            view.setOnTouchListener { v, event ->
+                when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        v.animate().cancel()
+                        v.animate().scaleX(0.88f).scaleY(0.88f).setDuration(60).start()
+                    }
+                    android.view.MotionEvent.ACTION_UP -> {
+                        v.animate().cancel()
+                        v.animate().scaleX(1f).scaleY(1f)
+                            .setDuration(350)
+                            .setInterpolator(android.view.animation.OvershootInterpolator(3f))
+                            .start()
+                    }
+                    android.view.MotionEvent.ACTION_CANCEL -> {
+                        v.animate().cancel()
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+                    }
+                }
+                false
+            }
+        }
+    }
+
     private fun bindUI() {
-        b.btnPickFile.setOnClickListener   { bankPicker.launch(arrayOf("*\/*")) }
+        b.btnPickFile.setOnClickListener   { bankPicker.launch(arrayOf("*/*")) }
         b.btnPickFolder.setOnClickListener { folderPicker.launch(null) }
         b.btnPickOutput.setOnClickListener { outputPicker.launch(null) }
         b.btnResetOutput.setOnClickListener {
@@ -79,6 +126,9 @@ class MainActivity : AppCompatActivity() {
             val cm = getSystemService(android.content.ClipboardManager::class.java)
             cm.setPrimaryClip(android.content.ClipData.newPlainText("log", b.tvLog.text?.toString() ?: "")); toast("已复制")
         }
+        b.btnClearLog.setOnClickListener {
+            b.tvLog.text = "等待操作..."
+        }
     }
 
     private fun setBtns(on: Boolean) {
@@ -103,6 +153,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ═══ 文件选择 ═══
     private fun onBankPicked(uri: Uri) {
         resolveFilePath(uri)?.let {
             bankPath = it; b.tvFile.text = File(it).name
@@ -126,6 +177,7 @@ class MainActivity : AppCompatActivity() {
         resolveTreePath(uri)?.let { outputPath = it; b.tvOutputDir.text = it; File(it).mkdirs(); log("输出: $it") }
     }
 
+    // ═══ 桥接 ═══
     private fun terminalConvertSingle(path: String) {
         if (!bridgeAlive) { toast("桥接未连接"); return }
         job?.cancel(); job = CoroutineScope(Dispatchers.IO).launch {
@@ -155,6 +207,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ═══ Path ═══
     private fun resolveFilePath(uri: Uri): String? {
         try {
             contentResolver.query(uri, arrayOf(android.provider.MediaStore.MediaColumns.DATA), null, null, null)?.use { c ->
@@ -177,7 +230,8 @@ class MainActivity : AppCompatActivity() {
         }
     } catch (_: Exception) { null }
 
-    private fun showProgress(on: Boolean) { b.progressContainer.visibility = if (on) View.VISIBLE else View.GONE }
+    // ═══ UI ═══
+    private fun showProgress(on: Boolean) { b.progressContainer.visibility = if (on) View.VISIBLE else View.GONE; if (on) { b.progress.progress = 0; b.tvProgress.text = "0%" } }
     private fun log(msg: String) { runOnUiThread { b.tvLog.text = ((b.tvLog.text?.toString() ?: "") + "\n" + msg).lines().takeLast(150).joinToString("\n") } }
     private suspend fun ui(block: () -> Unit) = withContext(Dispatchers.Main) { block() }
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
