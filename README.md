@@ -1,15 +1,9 @@
 # 🎵 Bank2Mp3 — FMOD `.bank` Audio Extractor
 
-> Android Native App · Terminal Bridge · Van Gogh Themed Motion  
+[![EN](https://img.shields.io/badge/lang-EN-blue)]() [![中文](https://img.shields.io/badge/lang-中文-red)](README_CN.md)
+
+> Android Native App · Terminal Bridge Architecture · Van Gogh Themed Motion  
 > Extract audio from game `.bank` files, batch transcode to MP3/AAC/FLAC/OGG/OPUS
-
-<details>
-<summary>📖 中文版 / Chinese (点击展开)</summary>
-
-> Android 原生应用 · 终端桥接架构 · 梵高主题动效  
-> 从游戏 `.bank` 文件中提取音频，批量转码为 MP3/AAC/FLAC/OGG/OPUS
-
-</details>
 
 [![Android](https://img.shields.io/badge/Android-8.0%2B-green?logo=android)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-blue?logo=kotlin)](https://kotlinlang.org)
@@ -18,25 +12,7 @@
 
 ---
 
-## ✨ Features · 特性
-
-<details>
-<summary>中文</summary>
-
-| 功能 | 说明 |
-|------|------|
-| 🔍 **.bank 解析** | 基于 FMOD API 提取音频流，输出无损 WAV |
-| 🔄 **多格式转码** | MP3 (192k/320k) · AAC · FLAC · OGG · OPUS (via FFmpeg) |
-| 📦 **批量处理** | 整个目录批量转换，支持递归扫描 |
-| 🏷️ **中文分类** | 按音频中文名自动归类到目录 |
-| 🌐 **终端桥接** | Python HTTP 服务 → APK 通过 localhost:8899 通信 |
-| 🎨 **双主题动态背景** | 暗色·梵高《星月夜》星空 / 亮色·油画布肌理 |
-| 🌟 **动态粒子效果** | 200+ 闪烁星空、12 颗呼吸光斑、漩涡弧线 |
-| 📋 **日志折叠** | 点击标题栏折叠/展开运行日志 |
-| ⏱️ **工作流守护** | Operit 工作流每分钟自动保活桥接服务 |
-| 🐔 **坤坤彩蛋** | 致敬经典 |
-
-</details>
+## ✨ Features
 
 | Feature | Description |
 |---------|-------------|
@@ -45,7 +21,7 @@
 | 📦 **Batch Processing** | Directory-wide conversion with recursive scanning |
 | 🏷️ **Chinese Classify** | Auto-sort by Chinese audio name into folders |
 | 🌐 **Terminal Bridge** | Python HTTP server ↔ APK via `localhost:8899` |
-| 🎨 **Dual Themes** | Dark·Van Gogh Starry Night / Light·Oil Canvas |
+| 🎨 **Dual Themes** | Dark·Van Gogh _Starry Night_ / Light·Oil Canvas |
 | 🌟 **Particle Effects** | 200+ twinkling stars, 12 glowing halos, swirl arcs |
 | 📋 **Collapsible Log** | Tap title bar to fold/unfold the log panel |
 | ⏱️ **Workflow Guardian** | Operit workflow keeps bridge alive every minute |
@@ -53,49 +29,48 @@
 
 ---
 
-## 🖼️ Preview · 预览
+## 🖼️ Preview
 
 | Dark · Starry Night | Light · Oil Canvas |
 |:---:|:---:|
 | Deep blue gradient + twinkling stars + swirl arcs + 12 glowing halos | Warm cream + linen weave + golden brush strokes + soft light spots |
 
-> Backgrounds are Canvas-rendered at runtime — no static images. Stars breathe independently via sine-wave (100ms/frame).  
-> 背景基于 Canvas 实时绘制，非图片素材。星空粒子以正弦波独立呼吸闪烁（100ms/帧）。
+> Backgrounds are Canvas-rendered at runtime — no static images. Stars breathe independently via sine-wave (100ms/frame).
 
 ---
 
-## 🏗️ Architecture · 架构
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────┐
 │              Android APK                 │
 │  ┌───────────────────────────────────┐  │
 │  │     MainActivity (Kotlin)          │  │
-│  │  • UI / Effects / Themes          │  │
-│  │  • OkHttp → localhost:8899        │  │
+│  │  • UI / Effects / Themes           │  │
+│  │  • OkHttp → localhost:8899         │  │
 │  └──────────────┬────────────────────┘  │
 │                 │ HTTP POST /exec        │
 │                 │       /batch           │
 │                 │       /wav2mp3         │
 │  ┌──────────────▼────────────────────┐  │
 │  │  terminal_server.py (Python)      │  │
-│  │  • FMOD parsing · FFmpeg encode  │  │
-│  │  • Batch · Classification         │  │
+│  │  • FMOD parsing · FFmpeg encode   │  │
+│  │  • Batch · Classification          │  │
 │  └───────────────────────────────────┘  │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-## 📲 Install · 安装
+## 📲 Installation
 
-### Prerequisites · 前提
+### Prerequisites
 
 - Android 8.0+ (API 26+)
 - [ZeroTermux](https://github.com/hanxinhao000/ZeroTermux) or any proot terminal
 - Python 3.8+ + FFmpeg (in terminal environment)
 
-### Build · 构建
+### Build
 
 ```bash
 git clone https://github.com/MuXi36/Bank2Mp3.git
@@ -107,21 +82,21 @@ bash gradlew assembleDebug
 # Output: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### First Run · 首次运行
+### First Run
 
-1. Install the APK · 安装 APK
-2. Start the bridge in ZeroTermux · 在终端启动桥接：
+1. Install the APK
+2. Start the bridge in ZeroTermux:
    ```bash
    python3 /sdcard/Download/Bank2Mp3/scripts/terminal_server.py
    ```
-3. Or auto-start via Operit workflow (checks every minute) · 或配置 Operit 工作流自动保活
+3. Or auto-start via Operit workflow (checks every minute)
 
 ---
 
-## 🎮 Usage · 使用
+## 🎮 Usage
 
-| Operation | Path |
-|-----------|------|
+| Operation | How |
+|-----------|-----|
 | Pick `.bank` file | File picker → single conversion |
 | Pick directory | Document tree → batch scan |
 | Terminal bridge | Start `terminal_server.py` first, then tap convert |
@@ -132,7 +107,7 @@ bash gradlew assembleDebug
 
 ---
 
-## 🎨 Motion System · 动效系统
+## 🎨 Motion System
 
 | Effect | Description |
 |--------|-------------|
@@ -149,7 +124,7 @@ bash gradlew assembleDebug
 
 ---
 
-## 📂 Project Structure · 项目结构
+## 📂 Project Structure
 
 ```
 Bank2Mp3/
@@ -178,7 +153,7 @@ Bank2Mp3/
 
 ---
 
-## 🙏 Acknowledgments · 感谢
+## 🙏 Acknowledgments
 
 These projects made Bank2Mp3 possible:
 
@@ -197,9 +172,9 @@ Special thanks to all developers who helped debug Shizuku permissions, proot pat
 
 ---
 
-## 📄 License · 许可证
+## 📄 License
 
-MIT License · Copyright © 2025 Vael Li
+MIT License · Copyright © 2025 MuXi
 
 ---
 
